@@ -2,7 +2,52 @@ module.exports = dataTable;
 
 const ARG_TERM = '||';
 
+class Value {
+  constructor(v) {
+    this.v = v;
+  }
+}
+
 function dataTable(parts, ...values) {
+  console.log('dataTable()', { parts, values });
+  const full = [ parts[0].trim() ];
+  for(let i=0; i<values.length; ++i) {
+    full.push(new Value(values[i]), parts[i+1]);
+  }
+  full[full.length-1] = full[full.length-1].trim();
+  console.log('dataTable()', { full });
+
+  const lines = [];
+  let currentLine = [];
+  for(const f of full) {
+    if(f instanceof Value) currentLine.push(f);
+    else if(!f.includes('\n')) currentLine.push(f);
+    else {
+      const [endThis, ...others] = f.split('\n');
+      currentLine.push(endThis);
+      lines.push(currentLine);
+      while(others.length > 1) lines.push([ others.shift() ]);
+      currentLine = [ others[0] ];
+    }
+  }
+  if(currentLine.length) lines.push(currentLine);
+  console.log('dataTable()', { lines });
+
+  const processedLines = lines.map(line => {
+    const pLine = [];
+    for(const cell of line) {
+      console.log('cell:', typeof cell, cell);
+      if(cell instanceof Value) pLine.push(cell.v);
+      else {
+        pLine.push(...tokenise(cell));
+      }
+    }
+    return pLine;
+  });
+  console.log('dataTable()', { processedLines });
+
+  process.exit();
+
   parts = parts.map(it => it.trim());
 
   if(parts[0]) throw new Error(`Unexpected text before first arg column: '${parts[0]}'`);
@@ -25,6 +70,7 @@ function dataTable(parts, ...values) {
 
   let currentRow;
   const newCurrent = () => {
+    console.log('newCurrent()', 'previous:', currentRow);
     if(currentRow) rows.push(currentRow);
     state = 'processing-args';
     currentRow = { args:[], vals:[] };
@@ -46,6 +92,7 @@ function dataTable(parts, ...values) {
 
     // There are probably some bugs here relating to empty strings in first
     // column or first column after ARG_TERM.  TODO write tests and fix.
+    console.log('    testing currentPart:', currentPart);
     if(currentPart.startsWith(ARG_TERM)) {
       state = 'processing-vals';
       currentPart = currentPart.substr(ARG_TERM.length);
@@ -60,10 +107,12 @@ function dataTable(parts, ...values) {
     }
 
     const unshiftAfter = seq => {
+      console.log('unshiftAfter()', { seq, currentPart });
       if(currentPart.includes(seq)) {
         const [ a, ...remaining ] = currentPart.split(seq);
         currentPart = a.trim();
         parts.unshift(seq + remaining.join(seq));
+        console.log('unshiftAfter()', { currentPart, unshifted:parts[0] });
       }
     };
     unshiftAfter(ARG_TERM);
@@ -74,6 +123,7 @@ function dataTable(parts, ...values) {
   };
 
   while(popPart()) {
+    console.log('  while{}', { state, currentPart });
     switch(state) {
       case 'processing-args': {
         currentRow.args.push(parseSpecial(currentPart));
@@ -86,12 +136,17 @@ function dataTable(parts, ...values) {
   }
   newCurrent();
 
+  console.log('rows:', rows);
+
   for(const r of rows) {
+    console.log('Trying to match:', args, r.args);
     if(args.length !== r.args.length) continue;
 
     // N.B. weak value comparison to allow for easy use of numbers in text.
     // This may cause ambiguities down the line...
-    if(args.some((arg, i) => arg != r.args[i])) continue;
+    if(args.some((arg, i) => {
+      return arg != r.args[i] && !(typeof arg === 'string' && !arg && !r.args[i]);
+    })) continue;
 
     return fieldNames.reduce((ret, k, i) => {
       ret[k] = r.vals[i];
@@ -111,4 +166,36 @@ function parseSpecial(v) {
   if(v === '✅') return true;
   if(v === '❌') return false;
   return v;
+}
+
+const ARG_DIVIDER = Symbol('||');
+const COL_DIVIDER = Symbol('|');
+function tokenise(str) {
+  const replaced = replace(str, '||', ARG_DIVIDER)
+      .map(it => typeof it === 'string' ? replace(it, '|', COL_DIVIDER) : it)
+      .flat();
+  return replaced
+      .filter((v, idx) => {
+        if(typeof v !== 'string') return true;
+        if(v) return true;
+        const prev = replaced[idx-1];
+        const next = replaced[idx+1];
+        if(prev instanceof Value || !prev) return false;
+        if(next instanceof Value || !next) return false;
+        return true;
+      })
+      .map(it => {
+        console.log('it:',it);
+        if(it === '✅') return true;
+        if(it === '❌') return false;
+        return it;
+      });
+}
+function replace(str, match, replacement) {
+  const splitByArg = str.split(match).map(it => it.trim());
+  const rebuilt = [ splitByArg[0] ];
+  for(let i=1; i<splitByArg.length; ++i) {
+    rebuilt.push(replacement, splitByArg[i]);
+  }
+  return rebuilt;
 }
