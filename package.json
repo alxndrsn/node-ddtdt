@@ -1,8 +1,19 @@
 {
-  "name": "testdatatable",
+  "name": "tdt-data-table",
   "version": "0.0.1",
   "main": "index.js",
   "repository": "git@github.com:alxndrsn/node-testdatatable.git",
   "author": "alxndrsn",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "lint": "eslint --cache ./src ./test",
+    "test:mocha": "mocha ./test/**/*.spec.js",
+    "test": "yarn lint && yarn test:mocha"
+  },
+  "devDependencies": {
+    "chai": "4",
+    "eslint": "8",
+    "mocha": "^10.7.3"
+  },
+  "dependencies": {}
 }
