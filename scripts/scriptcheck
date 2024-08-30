@@ -30,7 +30,7 @@ for path in "$scriptRoot"/**/*; do
   case "$executable" in
     bash) log "    processing with shellcheck..."; shellcheck                 "$path" ;;
     node) log "    processing with eslint..."    ; ./node_modules/.bin/eslint "$path" ;;
-    *)    
+    *)
       log "    !!! unsupported executable type: $executable !!!"
       exit 1 ;;
   esac
