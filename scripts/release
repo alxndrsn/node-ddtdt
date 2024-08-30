@@ -1,0 +1,20 @@
+#!/bin/bash -eu
+set -o pipefail
+
+log() { echo >&2 "[$(basename "$0")] $*"; }
+
+./scripts/git-assert-clean
+./scripts/git-assert-branch master # TODO allow patch branches
+./scripts/git-assert-pushed
+
+log "Tagging in git..."
+tag="v$(jq -r .version package.json)"
+git tag "$tag"
+
+log "Publishing to npm..."
+npm publish
+
+log "Pushing tag to git..."
+git push --tags
+
+log "Release complete: $tag"

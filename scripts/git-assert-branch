@@ -1,0 +1,28 @@
+#!/bin/bash -eu
+set -o pipefail
+
+log() { echo >&2 "[$(basename "$0")] $*"; }
+
+if [[ $# -lt 1 ]]; then
+  log "!!! No branches requested - check script usage !!!"
+  exit 1
+fi
+
+allExpected="$*"
+
+actual="$(git rev-parse --abbrev-ref HEAD)"
+while [[ $# -gt 0 ]]; do
+  expectedBranch="$1"
+  shift
+  if [[ "$actual" = "$expectedBranch" ]]; then
+    log "Matched branch: $actual"
+    exit
+  fi
+done
+
+log "!!!"
+log "!!! Branch did not match any of expected options !!!"
+log "!!!   expected: $allExpected"
+log "!!!     actual: $actual"
+log "!!!"
+exit 1

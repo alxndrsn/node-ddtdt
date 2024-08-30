@@ -1,13 +1,14 @@
 {
   "name": "ddtdt",
   "description": "data-driven test data tables",
-  "version": "0.1.1",
+  "version": "1.0.0",
   "main": "index.js",
   "repository": "git@github.com:alxndrsn/node-testdatatable.git",
   "author": "alxndrsn",
   "license": "MIT",
   "scripts": {
     "lint": "eslint --cache ./src ./test",
+    "release": "./scripts/release",
     "test:mocha": "mocha ./test/**/*.spec.js",
     "test": "yarn lint && yarn test:mocha"
   },

@@ -1,0 +1,17 @@
+#!/bin/bash -eu
+set -o pipefail
+
+log() { echo >&2 "[$(basename "$0")] $*"; }
+
+log "Checking git status..."
+status="$(git status --porcelain)"
+
+if [[ "$status" != "" ]]; then
+  git status
+  log "!!!"
+  log "!!! Your working directory is dirty.  Make sure you have committed all changes !!!"
+  log "!!!"
+  exit 1
+fi
+
+log "Everything OK."

@@ -1,0 +1,22 @@
+#!/bin/bash -eu
+set -o pipefail
+
+log() { echo >&2 "[$(basename "$0")] $*"; }
+
+upstream="$(git rev-parse --abbrev-ref '@{upstream}')"
+remote="${upstream%%/*}"
+
+log "Fetching from remote '$remote'..."
+git fetch "$remote"
+
+log "Comparing to $upstream..."
+if ! git diff --exit-code "$upstream"..HEAD; then
+  log "!!!"
+  log "!!! Differences found between HEAD and tracking branch $upstream !!!"
+  log "!!!"
+  log "!!! Do you need to git push?"
+  log "!!!"
+  exit 1
+fi
+
+log "Looks OK."
