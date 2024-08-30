@@ -1,5 +1,6 @@
 {
-  "name": "tdt-data-table",
+  "name": "ddtdt",
+  "description": "data-driven test data tables",
   "version": "0.1.1",
   "main": "index.js",
   "repository": "git@github.com:alxndrsn/node-testdatatable.git",
