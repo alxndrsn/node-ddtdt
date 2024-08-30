@@ -38,9 +38,9 @@ describe('dataTable', () => {
         ${args.length} | ${args[0]} || type       | colourTxt  | colourEnabled | codeTxt    | codeEnabled
                      0 |            || Type...    |            | ❌            | Code...    | ❌
                      1 |            || Type...    |            | ❌            | Code...    | ✅
+                     1 | a-type     || other1     |            | ✅            | Code...    | ❌
                      1 | ${args[0]} || ${args[0]} |            | ❌            | Code...    | ❌
                      `;
-//                     1 | a-type     || other1     |            | ✅            | Code...    | ❌
 //                     1 | b-type     || other2     |            | ✅            | Code...    | ✅
 //                     2 | ${args[0]} || ${args[0]} | ${args[1]} | ✅            | Code...    | ✅
 //                     3 | ${args[0]} || ${args[0]} | ${args[1]} | ✅            | ${args[2]} | ✅
@@ -53,9 +53,9 @@ describe('dataTable', () => {
     });
 
     [
-//      [ [],                               ['Type...', '',         false, 'Code...', false] ],
-//      [ [''],                             ['Type...', '',         false, 'Code...', true ] ],
-      [ ['a-type'],                       ['other1',  '',         true,  'Code...', false] ],
+      [ [],                               ['Type...', '',         false, 'Code...', false] ],
+//    [ [''],                             ['Type...', '',         false, 'Code...', true ] ],
+//    [ ['a-type'],                       ['other1',  '',         true,  'Code...', false] ],
 //      [ ['b-type'],                       ['other2',  '',         true,  'Code...', true ] ],
 //      [ ['X-type'],                       ['X-type',  '',         false, 'Code...', false] ],
 //      [ ['a-type', 'a-colour'],           ['a-type',  'a-colour', true,  'Code...', true ] ],
