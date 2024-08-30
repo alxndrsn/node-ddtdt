@@ -157,10 +157,12 @@ function dataTable(parts, ...values) {
 
     // N.B. weak value comparison to allow for easy use of numbers in text.
     // This may cause ambiguities down the line...
-    if(args.some((arg, i) => {
+    if(!args.every((arg, i) => {
       console.log({ arg, tArg:typeof arg, rArg:r.args[i] });
-      // TODO something wrong here!
-      return arg != r.args[i] && !(arg != null && !arg && !r.args[i]);
+//      // TODO something wrong here!
+//      return arg != r.args[i] && !(arg != null && !arg && !r.args[i]);
+      if(arg == r.args[i]) return true;
+      if(arg == null && r.args[i] === '') return true;
     })) continue;
 
     return fieldNames.reduce((ret, k, i) => {
