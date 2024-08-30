@@ -6,6 +6,8 @@ on:
   pull_request:
 
 jobs:
+  shellcheck:
+    - run: ./scripts/scriptcheck ./scripts
   build:
     timeout-minutes: 10
     runs-on: ubuntu-latest

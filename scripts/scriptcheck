@@ -1,0 +1,41 @@
+#!/bin/bash -eu
+set -o pipefail
+
+log() {
+  echo >&2 "[scriptcheck] $*"
+}
+
+getExecutable() {
+  path="$1"
+  shebang="$(head -n1 "$path")"
+  if grep -q "/bin/env" <<< "$shebang"; then
+    executable="$(sed -E -e 's:#!\s*(/usr)?/bin/env\s+\b([a-z]+)\b.*:\2:' <<< "$shebang")"
+  else
+    executable="$(basename "$(sed -E -e 's:#!\s*([a-z/]+).*:\1:' <<< "$shebang")")"
+  fi
+  echo "$executable"
+}
+
+log "Checking $1..."
+
+shopt -s globstar nullglob # see https://www.shellcheck.net/wiki/SC2044
+
+for path in "$1"/**/*; do
+  if [[ -d "$path" ]]; then continue; fi
+
+  # ignore 3rd-party script(s) here, e.g.:
+  # if [[ "$path" = ./scripts/wait-for-it.sh ]]; then continue; fi
+
+  log "  Processing: $path..."
+  executable="$(getExecutable "$path")"
+  case "$executable" in
+    bash) log "    processing with shellcheck..."; shellcheck                 "$path" ;;
+    node) log "    processing with eslint..."    ; ./node_modules/.bin/eslint "$path" ;;
+    *)    
+      log "    !!! unsupported executable type: $executable !!!"
+      exit 1 ;;
+  esac
+  log "    OK."
+done
+
+log "$1 OK."
