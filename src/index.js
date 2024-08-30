@@ -1,5 +1,8 @@
 module.exports = dataTable;
 
+const ARG_DIVIDER = Symbol('||');
+const COL_DIVIDER = Symbol('|');
+
 class Value {
   constructor(v) {
     this.v = v;
@@ -69,8 +72,6 @@ function dataTable(parts, ...values) {
   throw new Error(`No args matched ${JSON.stringify(args)}`);
 }
 
-const ARG_DIVIDER = Symbol('||');
-const COL_DIVIDER = Symbol('|');
 function tokenise(str) {
   const replaced = replace(str, '||', ARG_DIVIDER)
       .map(it => typeof it === 'string' ? replace(it, '|', COL_DIVIDER) : it)
@@ -91,6 +92,7 @@ function tokenise(str) {
         return it;
       });
 }
+
 function replace(str, match, replacement) {
   const splitByArg = str.split(match).map(it => it.trim());
   const rebuilt = [ splitByArg[0] ];
