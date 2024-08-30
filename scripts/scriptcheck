@@ -1,9 +1,7 @@
 #!/bin/bash -eu
 set -o pipefail
 
-log() {
-  echo >&2 "[scriptcheck] $*"
-}
+log() { echo >&2 "[$(basename "$0")] $*"; }
 
 getExecutable() {
   path="$1"
@@ -16,11 +14,12 @@ getExecutable() {
   echo "$executable"
 }
 
-log "Checking $1..."
+scriptRoot="./scripts"
+log "Checking $scriptRoot..."
 
 shopt -s globstar nullglob # see https://www.shellcheck.net/wiki/SC2044
 
-for path in "$1"/**/*; do
+for path in "$scriptRoot"/**/*; do
   if [[ -d "$path" ]]; then continue; fi
 
   # ignore 3rd-party script(s) here, e.g.:
@@ -38,4 +37,4 @@ for path in "$1"/**/*; do
   log "    OK."
 done
 
-log "$1 OK."
+log "$scriptRoot OK."

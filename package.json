@@ -9,7 +9,6 @@
   "scripts": {
     "lint": "eslint --cache ./src ./test",
     "release": "./scripts/release",
-    "shellcheck": "./scripts/scriptcheck ./scripts",
     "test:mocha": "mocha ./test/**/*.spec.js",
     "test": "yarn lint && yarn test:mocha"
   },

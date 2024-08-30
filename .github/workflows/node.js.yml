@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - run: ./scripts/scriptcheck ./scripts
+    - run: ./scripts/scriptcheck
   build:
     timeout-minutes: 10
     runs-on: ubuntu-latest
