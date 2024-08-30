@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    timeout-minutes: 10
+    timeout-minutes: 2
     runs-on: ubuntu-latest
     steps:
     # See: https://github.com/actions/setup-node/issues/480
