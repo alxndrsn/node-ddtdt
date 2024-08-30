@@ -1,7 +1,5 @@
 module.exports = dataTable;
 
-const ARG_TERM = '||';
-
 class Value {
   constructor(v) {
     this.v = v;
@@ -9,13 +7,11 @@ class Value {
 }
 
 function dataTable(parts, ...values) {
-  console.log('dataTable()', { parts, values });
   const full = [ parts[0].trim() ];
   for(let i=0; i<values.length; ++i) {
     full.push(new Value(values[i]), parts[i+1]);
   }
   full[full.length-1] = full[full.length-1].trim();
-  console.log('dataTable()', { full });
 
   const lines = [];
   let currentLine = [];
@@ -31,12 +27,10 @@ function dataTable(parts, ...values) {
     }
   }
   if(currentLine.length) lines.push(currentLine);
-  console.log('dataTable()', { lines });
 
   const processedLines = lines.map(line => {
     const pLine = [];
     for(const cell of line) {
-      console.log('cell:', typeof cell, cell);
       if(cell instanceof Value) pLine.push(cell.v);
       else {
         pLine.push(...tokenise(cell));
@@ -53,114 +47,15 @@ function dataTable(parts, ...values) {
     }
     return objLine;
   });
-  console.log('dataTable()', processedLines);
 
   const [ { args, vals:fieldNames }, ...rows ] = processedLines;
 
-  console.log('dataTable()', 'args:', args);
-  console.log('dataTable()', 'fieldNames:', fieldNames);
-  console.log('dataTable()', 'rows:', rows);
-
-//  parts = parts.map(it => it.trim());
-//
-//  if(parts[0]) throw new Error(`Unexpected text before first arg column: '${parts[0]}'`);
-//  parts.shift();
-//
-//  const args = [ values.shift() ];
-//  while(!endOfArgs(parts)) {
-//    args.push(values.shift());
-//    parts.shift();
-//  }
-//
-//  if(!parts.length) throw new Error('No remaining parts!');
-//  const [ firstLine, ...remaining ] = parts.shift().split('\n');
-//  parts.unshift(remaining.join('\n').trim());
-//
-//  const fieldNames = firstLine.substr(ARG_TERM.length).split('|').map(s => s.trim());
-//
-//  let state;
-//  const rows = [];
-//
-//  let currentRow;
-//  const newCurrent = () => {
-//    console.log('newCurrent()', 'previous:', currentRow);
-//    if(currentRow) rows.push(currentRow);
-//    state = 'processing-args';
-//    currentRow = { args:[], vals:[] };
-//  };
-//  newCurrent();
-//
-//  let currentPart;
-//  const popPart = () => {
-//    currentPart = parts.shift();
-//    if(currentPart === undefined) return false;
-//
-//    currentPart = currentPart.replace(/^[ \t]*/, '');
-//    if(currentPart.startsWith('\n')) {
-//      newCurrent();
-//      currentPart = currentPart.trim();
-//    }
-//
-//    currentPart = currentPart.trim();
-//
-//    // There are probably some bugs here relating to empty strings in first
-//    // column or first column after ARG_TERM.  TODO write tests and fix.
-//    console.log('    testing currentPart:', currentPart);
-//    if(currentPart.startsWith(ARG_TERM)) {
-//      state = 'processing-vals';
-//      currentPart = currentPart.substr(ARG_TERM.length);
-//    }
-//    if(currentPart.startsWith('|')) {
-//      currentPart = currentPart.substr(1).trim();
-//    }
-//
-//    if(!currentPart) {
-//      currentPart = values.shift();
-//      return true;
-//    }
-//
-//    const unshiftAfter = seq => {
-//      console.log('unshiftAfter()', { seq, currentPart });
-//      if(currentPart.includes(seq)) {
-//        const [ a, ...remaining ] = currentPart.split(seq);
-//        currentPart = a.trim();
-//        parts.unshift(seq + remaining.join(seq));
-//        console.log('unshiftAfter()', { currentPart, unshifted:parts[0] });
-//      }
-//    };
-//    unshiftAfter(ARG_TERM);
-//    unshiftAfter('|');
-//    unshiftAfter('\n');
-//
-//    return currentPart !== undefined;
-//  };
-//
-//  while(popPart()) {
-//    console.log('  while{}', { state, currentPart });
-//    switch(state) {
-//      case 'processing-args': {
-//        currentRow.args.push(parseSpecial(currentPart));
-//      } break;
-//      case 'processing-vals': {
-//        currentRow.vals.push(parseSpecial(currentPart));
-//      } break;
-//      default: throw new Error(`No handling for state '${state}'`);
-//    }
-//  }
-//  newCurrent();
-//
-//  console.log('rows:', rows);
-//
   for(const r of rows) {
-    console.log('Trying to match:', args, r.args);
     if(args.length !== r.args.length) continue;
 
     // N.B. weak value comparison to allow for easy use of numbers in text.
     // This may cause ambiguities down the line...
     if(!args.every((arg, i) => {
-      console.log({ arg, tArg:typeof arg, rArg:r.args[i] });
-//      // TODO something wrong here!
-//      return arg != r.args[i] && !(arg != null && !arg && !r.args[i]);
       if(arg == r.args[i]) return true;
       if(arg == null && r.args[i] === '') return true;
     })) continue;
@@ -172,17 +67,6 @@ function dataTable(parts, ...values) {
   }
 
   throw new Error(`No args matched ${JSON.stringify(args)}`);
-}
-
-function endOfArgs([nextPart]) {
-  if(nextPart == null) throw new Error(`String ends before arg terminator ('${ARG_TERM}') seen!`);
-  return nextPart.startsWith(ARG_TERM);
-}
-
-function parseSpecial(v) {
-  if(v === '✅') return true;
-  if(v === '❌') return false;
-  return v;
 }
 
 const ARG_DIVIDER = Symbol('||');
@@ -202,7 +86,6 @@ function tokenise(str) {
         return true;
       })
       .map(it => {
-        console.log('it:',it);
         if(it === '✅') return true;
         if(it === '❌') return false;
         return it;
